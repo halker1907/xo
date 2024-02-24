@@ -1,9 +1,29 @@
 from os import system
+from random import choice
 
 class Player:
-    def __init__(self, is_automatic=True, image="X"):
+    def __init__(self, is_automatic=True, image="X", is_center=False, is_predict=False):
         self.image = image
         self.is_automatic = is_automatic
+        self.is_center = is_center
+        self.is_predict = is_predict
+
+    def get_winner(self) -> str:
+        for i in range(0, 7, 3):
+            if self.field.cells[i] == self.field.cells[i + 1] == self.field.cells[i + 2]:
+                return self.field.cells[i]
+
+        for i in range(3):
+            if self.field.cells[i] == self.field.cells[i + 3] == self.field.cells[i + 2]:
+                return self.field.cells[i]
+            
+        if self.field.cells[0] == self.field.cells[4] == self.field.cells[8]:
+            return self.field.cells[i]
+        
+        if self.field.cells[2] == self.field.cells[4] == self.field.cells[6]:
+            return self.field.cells[i]
+        return ''
+
     
     def make_move(self, field):
         if not self.is_automatic:
@@ -21,7 +41,23 @@ class Player:
                     print("Ошибка! Клетка занята!")
                     continue
                 break
-        field.cells[index] = self.image
+            field.cells[index] = self.image
+        else:
+            free_cells_indexes = []
+            for i in range(9):
+                if isinstance(field.cells[i], int):
+                    free_cells_indexes.append(i)
+            if self.is_center and 4 in free_cells_indexes:
+                field.cells[4] = self.image
+                return
+            if self.is_predict:
+                for index in free_cells_indexes:
+                    field.cells[index] = self.image
+                    if get_winner:
+                        return
+                    field.cells[index] = index + 1
+            random_index = choice(free_cells_indexes)
+            field.cells[random_index] = self.image
 
 
 class Field:
@@ -34,28 +70,44 @@ class Field:
             print(self.cells[i], self.cells[i + 1], self.cells[i + 2])
 
 class Game:
-    def __init__(self):
-        self.pl_1 = Player(image="X", is_automatic=False)
-        self.pl_2 = Player(image="O", is_automatic=False)
+    def __init__(self, is_silent=False):
+        self.pl_1 = Player(image="X", is_automatic=False, is_center=False, is_predict=False)
+        self.pl_2 = Player(image="O", is_automatic=False, is_center=True, is_predict=True)
         self.field = Field()
+        self.winner = None
+        self.is_silent = is_silent
 
     def run(self):
-        #начинаем с первого хода
-        while True: #выйти на 10 ходу - ничья
+        turn = 1
+        while True:
+            if turn > 9:
+                print('Ничья!')
+                break
             self.field.draw()
-            if :#нечетный ход
+            if turn % 2: # Нечетный ход
                 self.pl_1.make_move(self.field)
-            else:#четный ход
+            else: # Четный ход
                 self.pl_2.make_move(self.field)
-            #добавляем к ходам + 1
-            #проверить победителя
+            turn += 1
+            self.winner = self.get_winner()
+            if self.winner:
+                print(f'Победил {self.winner}')
+                break
 
 
 
 class App:
     def __init__(self):
-        self.game = Game()
+        self.statistics = [0, 0, 0] # x, o, ничья
+        self.game = Game(True)
         self.game.run()
+        if self.game.winner == 'X':
+            self.statistics[0] += 1
+        elif self.game.winner == 'O':
+            self.statistics[1] += 1
+        else:
+            self.statistics[2] += 1
+        print(*self.statistics)
 
 
 App()
