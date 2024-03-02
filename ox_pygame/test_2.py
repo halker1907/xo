@@ -47,6 +47,10 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
 
         if not game_over and event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
@@ -75,15 +79,22 @@ while True:
         if board[0][2] == board[1][1] == board[2][0] != '':
             pygame.draw.line(screen, WHITE, (WIDTH, 0), (0, HEIGHT), 5)
             game_over = True
+            
 
-        if all([cell != '' for row in board for cell in row]):
-            game_over = True
-
-        if game_over: #TODO закрывается раньше времени
+        if game_over == True:
+            font = pygame.font.Font("beer-money12.ttf", 70) #сайт шрифтов: https://ffont.ru/fonts
+            text = font.render("Игра окончена!", True, (0, 250, 0))
+            place = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+            screen.blit(text, place)
+            
+            
+        """
+        if game_over == True: #TODO закрывается раньше времени
             pygame.time.wait(3000)
             pygame.quit()
             sys.exit()
 
+        """
 
     draw_grid()
 
